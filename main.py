@@ -16,7 +16,7 @@ class Task(db.Model):
         self.name = name
         self.completed = False
 
-class User(db.model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True)
     password = db.Column(db.String(120))
@@ -25,12 +25,37 @@ class User(db.model):
         self.email = email
         self.password = password
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        user = User.query.filter_by(email = email).first()
+        if user and user.password == password:
+            # TODO - "remember" that the user has logged in
+            return redirect('/')
+        else:
+            # TODO - explain why the login failed
+            pass
     return render_template('login.html')
 
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        verify_password = request.form['verify_password']
+        # TODO - validate the users data
+        existing_user = User.query.filter_by(email = email).first()
+        if not existing_user:
+            new_user = User(email, password)
+            db.session.add(new_user)
+            db.session.commit()
+            # TODO - "remember" the user
+            return redirect('/')
+        else:
+            # TODO - user already exists
+            pass
     return render_template('register.html')
 
 @app.route('/', methods=['GET','POST'])
